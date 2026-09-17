@@ -38,8 +38,8 @@ build/
 
 # Model files
 # Uncomment if you do not want to upload trained models to GitHub
-# models/*.joblib
-# models/*.pkl
+ models/*.joblib
+ models/*.pkl
 
 # Large datasets
 # Uncomment if you do not want to upload CSV datasets
