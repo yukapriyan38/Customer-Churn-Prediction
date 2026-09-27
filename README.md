@@ -159,9 +159,6 @@ Churn prediction can help a telecom provider identify customers who may leave an
 - The dataset is historical and may not represent current customer behavior.
 - Future work could include calibration, Precision-Recall curves, SHAP explanations, and monitoring for data drift.
 
-## Resume-ready summary
-
-Built an end-to-end telecom customer churn prediction system using Python, Pandas, Scikit-learn, XGBoost, and Streamlit. Compared three classification models using five evaluation metrics, selected the best model by ROC-AUC, persisted reusable preprocessing pipelines, and deployed an interactive dashboard for customer-level churn risk prediction.
 
 ## Dataset
 
