@@ -1,165 +1,263 @@
 # Customer Churn Prediction
 
-An end-to-end machine-learning project that predicts whether a telecom customer is likely to churn. The project includes data cleaning, exploratory data analysis, three classification models, model comparison, persisted model pipelines, and an interactive Streamlit dashboard.
+A full-stack machine learning project that predicts whether a telecom customer is likely to churn. The repository includes a data-cleaning pipeline, exploratory data analysis, model training, a FastAPI inference service, and a React + Vite dashboard for end-user prediction.
+
+## Overview
+
+This project uses the IBM Telco Customer Churn dataset to train and compare multiple classifiers, then deploys the best model through a lightweight API and web UI. The app helps business teams quickly assess customer churn risk and make retention decisions based on churn probability.
 
 ## Features
 
-- Cleans and validates the Telco Customer Churn dataset.
-- Explores churn patterns with reusable visualizations.
-- Trains Logistic Regression, Random Forest, and XGBoost models.
-- Evaluates models using:
-  - Accuracy
-  - Precision
-  - Recall
-  - F1-score
-  - ROC-AUC
-- Selects the best model by ROC-AUC.
-- Provides customer-level churn prediction through a Streamlit web app.
-- Displays dataset summaries, EDA charts, model comparisons, and prediction results.
+- Cleans and validates the Telco Customer Churn dataset
+- Produces exploratory charts and data-quality summaries
+- Trains and compares three models:
+  - Logistic Regression
+  - Random Forest
+  - XGBoost
+- Selects the best model using ROC-AUC
+- Saves model artifacts and comparison metrics to `models/`
+- Exposes predictions via a FastAPI backend
+- Provides a React dashboard for interactive churn prediction
+- Includes a CLI prediction script for quick single-record predictions
 
 ## Project structure
 
 ```text
 churn/
-├── app.py                         # Streamlit dashboard
-├── clean_data.py                  # Cleans the original CSV
-├── check_data.py                  # Inspects data quality and target distribution
-├── eda.py                         # Generates exploratory visualizations
-├── logistic_model.py              # Trains Logistic Regression
-├── random_forest_model.py         # Trains Random Forest
-├── xgboost_model.py               # Trains XGBoost
-├── compare_models.py              # Compares metrics and selects best model
+├── README.md                     # Project overview and setup guide
+├── clean_data.py                 # Cleans the raw Telco dataset
+├── check_data.py                 # Data inspection and quality checks
+├── eda.py                        # Generates exploratory visualizations
+├── logistic_model.py             # Logistic Regression training
+├── random_forest_model.py        # Random Forest training
+├── xgboost_model.py              # XGBoost training
+├── compare_models.py              # Compares metrics and chooses best model
+├── predict.py                    # CLI-based single-record churn predictor
+├── backend/
+│   ├── main.py                   # FastAPI app for prediction, overview and model metadata
+│   └── requirements.txt          # Python API dependencies
+├── frontend/
+│   ├── src/                     # React frontend source
+│   ├── package.json             # Frontend dependencies and scripts
+│   ├── vite.config.js           # Vite configuration
+│   └── README.md                # Default Vite template text
 ├── data/
-│   └── cleaned_telco_churn.csv   # Cleaned input dataset
+│   ├── WA_Fn-UseC_-Telco-Customer-Churn.csv   # Original raw dataset
+│   └── cleaned_telco_churn.csv                # Cleaned data used by models
 ├── models/
-│   ├── *_metrics.json             # Saved evaluation metrics
-│   └── model_comparison.csv       # Combined model results
-└── plots/                         # EDA and evaluation charts
+│   ├── best_model.joblib        # Best saved model based on ROC-AUC
+│   ├── logistic_regression.joblib
+│   ├── random_forest.joblib
+│   ├── xgboost.joblib
+│   ├── logistic_regression_metrics.json
+│   ├── random_forest_metrics.json
+│   ├── xgboost_metrics.json
+│   └── model_comparison.csv
+├── plots/                       # EDA and evaluation visualizations
+├── venv/                        # Local virtual environment (generated)
+├── .gitignore                   # Ignore generated artifacts and local envs
+└── .git/                        # Git metadata
 ```
 
-Model binaries (`*.joblib`), the local virtual environment, and generated plots are excluded from Git by [.gitignore](./.gitignore). They are created locally by the training scripts.
+## Tech stack
 
-## Results
-
-The current comparison uses a stratified 80/20 train-test split with `random_state=42`.
-
-| Model | Accuracy | Precision | Recall | F1-score | ROC-AUC |
-|---|---:|---:|---:|---:|---:|
-| Logistic Regression | 73.81% | 50.43% | **78.34%** | **61.36%** | **84.16%** |
-| XGBoost | **79.91%** | **65.22%** | 52.14% | 57.95% | 83.88% |
-| Random Forest | 76.93% | 55.76% | 63.37% | 59.32% | 82.27% |
-
-Logistic Regression currently provides the highest ROC-AUC, recall, and F1-score. XGBoost provides the highest accuracy and precision. The preferred model depends on whether the business prioritizes finding more potential churners or minimizing false alerts.
-
-## Requirements
-
-- Python 3.10 or newer
+- Python 3.10+
 - pandas
 - scikit-learn
-- xgboost
+- XGBoost
 - joblib
 - matplotlib
 - seaborn
-- streamlit
+- FastAPI
+- Uvicorn
+- React
+- Vite
 
-## Installation
+## Model performance
 
-Create and activate a virtual environment:
+The current model comparison uses a stratified 80/20 train-test split with `random_state=42`.
+
+| Model | Accuracy | Precision | Recall | F1-score | ROC-AUC |
+|---|---:|---:|---:|---:|---:|
+| Logistic Regression | 73.81% | 50.43% | 78.34% | 61.36% | 84.16% |
+| XGBoost | 79.91% | 65.22% | 52.14% | 57.95% | 83.88% |
+| Random Forest | 76.93% | 55.76% | 63.37% | 59.32% | 82.27% |
+
+The best-performing model is currently Logistic Regression because it achieves the highest ROC-AUC, as well as the strongest recall and F1-score. This makes it a strong choice when the business priority is to catch more likely churners.
+
+## Setup
+
+### 1. Create a virtual environment
 
 ```powershell
 python -m venv venv
 .\venv\Scripts\Activate.ps1
 ```
 
-Install dependencies:
+### 2. Install Python dependencies
 
 ```powershell
-pip install pandas scikit-learn xgboost joblib matplotlib seaborn streamlit
+python -m pip install --upgrade pip
+python -m pip install -r backend\requirements.txt
 ```
 
-If PowerShell blocks script activation, run the commands with the virtual-environment interpreter directly:
+### 3. Install frontend dependencies
 
 ```powershell
-.\venv\Scripts\python.exe -m pip install pandas scikit-learn xgboost joblib matplotlib seaborn streamlit
+cd frontend
+npm install
 ```
 
-## Usage
+## Data preparation
 
-Run the following commands from the project root.
-
-### 1. Clean the raw dataset
-
-Place the original Telco CSV at `data/WA_Fn-UseC_-Telco-Customer-Churn.csv`, then run:
+Place the raw Telco CSV in `data/WA_Fn-UseC_-Telco-Customer-Churn.csv`, then run:
 
 ```powershell
-.\venv\Scripts\python.exe clean_data.py
+python clean_data.py
 ```
 
-This creates `data/cleaned_telco_churn.csv`, converts `TotalCharges` to numeric, fills new-customer charge values, and converts `Churn` to `0/1`.
+This script:
 
-### 2. Check the data
+- loads the raw dataset
+- cleans missing or inconsistent values
+- converts `TotalCharges` to numeric
+- fills missing charge values for new customers
+- converts `Churn` into binary labels (`0`/`1`)
+- saves the cleaned data to `data/cleaned_telco_churn.csv`
+
+## Exploratory analysis and plotting
+
+Run the EDA workflow from the root folder:
 
 ```powershell
-.\venv\Scripts\python.exe check_data.py
+python check_data.py
+python eda.py
 ```
 
-### 3. Generate EDA plots
+This creates summary tables and visualizations in `plots/` such as churn distribution, tenure analysis, feature importance, and correlation charts.
+
+## Training the models
+
+Train the three classifiers:
 
 ```powershell
-.\venv\Scripts\python.exe eda.py
+python logistic_model.py
+python random_forest_model.py
+python xgboost_model.py
 ```
 
-### 4. Train the models
+Each training script saves a model file and per-model metrics JSON under `models/`.
+
+## Selecting the best model
+
+After all training runs are complete, run:
 
 ```powershell
-.\venv\Scripts\python.exe logistic_model.py
-.\venv\Scripts\python.exe random_forest_model.py
-.\venv\Scripts\python.exe xgboost_model.py
+python compare_models.py
 ```
 
-Each script saves a model pipeline and a metrics JSON file in `models/`.
+This script:
 
-### 5. Compare models
+- reads all model metric files
+- ranks models by ROC-AUC
+- saves the comparison table to `models/model_comparison.csv`
+- copies the top model to `models/best_model.joblib`
+
+## Running the API
+
+Start the FastAPI backend from the project root:
 
 ```powershell
-.\venv\Scripts\python.exe compare_models.py
+.\venv\Scripts\python.exe -m uvicorn backend.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
-This writes `models/model_comparison.csv` and copies the highest-ROC-AUC model to `models/best_model.joblib`.
+The API is available at:
 
-### 6. Start the dashboard
+- `http://localhost:8000/api/health`
+- `http://localhost:8000/api/overview`
+- `http://localhost:8000/api/models`
+- `http://localhost:8000/api/predict`
+
+### API example
+
+`POST /api/predict` accepts a customer payload like:
+
+```json
+{
+  "gender": "Female",
+  "SeniorCitizen": 0,
+  "Partner": "Yes",
+  "Dependents": "No",
+  "tenure": 12,
+  "PhoneService": "Yes",
+  "MultipleLines": "No",
+  "InternetService": "Fiber optic",
+  "OnlineSecurity": "No",
+  "OnlineBackup": "No",
+  "DeviceProtection": "No",
+  "TechSupport": "No",
+  "StreamingTV": "No",
+  "StreamingMovies": "No",
+  "Contract": "Month-to-month",
+  "PaperlessBilling": "Yes",
+  "PaymentMethod": "Electronic check",
+  "MonthlyCharges": 70.7,
+  "TotalCharges": 848.4
+}
+```
+
+## Running the frontend
+
+In a separate terminal:
 
 ```powershell
-.\venv\Scripts\python.exe -m streamlit run app.py
+cd frontend
+npm run dev
 ```
 
-Open the local URL shown by Streamlit, usually `http://localhost:8501`.
+Then open the local Vite URL, typically:
+
+```text
+http://localhost:5173
+```
+
+The frontend loads overview metrics from the backend and lets you enter customer details to generate a churn prediction.
+
+## CLI prediction
+
+You can also run a quick single-record prediction in the terminal:
+
+```powershell
+python predict.py
+```
+
+This script prompts for customer attributes and prints the predicted churn class and probability using the saved best model.
 
 ## How the prediction pipeline works
 
-1. Load the cleaned customer data.
-2. Separate the `Churn` target from customer features.
-3. Detect categorical and numerical columns.
-4. Apply one-hot encoding to categorical features.
-5. Scale numerical features for Logistic Regression.
-6. Train the selected classifier.
-7. Generate a churn class and probability for a new customer.
+1. Load the cleaned Telco customer data
+2. Separate the target (`Churn`) from the feature columns
+3. Identify categorical and numeric variables
+4. Apply one-hot encoding to categorical data
+5. Scale numeric values for algorithms that require them
+6. Train the selected classifier
+7. Save the trained pipeline and evaluation metrics
+8. Use the saved model to score a new customer record
 
-The saved model is a complete scikit-learn pipeline, so preprocessing used during training is reused automatically during prediction.
+Because the model is saved as a complete scikit-learn pipeline, preprocessing is preserved automatically during inference.
 
-## Business interpretation
+## Business value
 
-Churn prediction can help a telecom provider identify customers who may leave and prioritize retention activities such as contract upgrades, service support, or targeted offers. Recall is particularly important when the cost of missing a potential churner is high; precision is more important when retention outreach is expensive.
+This churn model can help telecom teams identify customers at risk of leaving and prioritize retention campaigns, contract adjustments, service outreach, or targeted offers. In a churn context, recall matters when missing a potential churner is costly; precision becomes more important when outreach is expensive.
 
 ## Limitations and future improvements
 
-- The current evaluation is based on one stratified train-test split.
-- The default classification threshold is used; threshold tuning may improve the precision-recall trade-off.
-- Hyperparameter tuning and cross-validation should be added before production use.
-- The dataset is historical and may not represent current customer behavior.
-- Future work could include calibration, Precision-Recall curves, SHAP explanations, and monitoring for data drift.
-
+- The current evaluation uses a single stratified train-test split
+- Default classification thresholds are used without tuning
+- Hyperparameter tuning and cross-validation would improve model reliability
+- Model performance should be monitored over time as customer behavior changes
+- Future enhancements may include threshold optimization, calibration, SHAP explanations, and monitoring for data drift
 
 ## Dataset
 
-This project uses the public IBM Telco Customer Churn dataset. Review the dataset's original license and usage terms before redistributing the raw CSV.
+This project uses the public IBM Telco Customer Churn dataset. Review the original license and usage terms before redistributing the raw CSV.

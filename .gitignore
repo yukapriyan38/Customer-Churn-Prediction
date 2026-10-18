@@ -36,12 +36,29 @@ build/
 *.tmp
 *.temp
 
-# Model files
-# Uncomment if you do not want to upload trained models to GitHub
+# Node / frontend build output
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
 
+# Model files
 models/*.joblib
 models/*.pkl
+models/*.csv
+models/*.json
 
-# Large datasets
-# Uncomment if you do not want to upload CSV datasets
+# Data files
+# Keep raw or cleaned data local unless intentionally tracked
 # data/*.csv
+
+# Plots
+plots/*.png
+plots/*.jpg
+plots/*.jpeg
+plots/*.svg
+
+# Local session / editor files
+*.sqlite3
+*.db
+
+
